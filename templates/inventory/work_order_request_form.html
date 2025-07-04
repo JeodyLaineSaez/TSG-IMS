@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} Work Order Request - TSG IMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="text-center mb-4">{{ action }} Work Order Request</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.item|as_crispy_field }}
+                    {{ form.campus|as_crispy_field }}
+                    {{ form.office|as_crispy_field }}
+                    {{ form.datetime_started|as_crispy_field }}
+                    {{ form.type|as_crispy_field }}
+                    {{ form.description|as_crispy_field }}
+                    {{ form.requested_by|as_crispy_field }}
+                    {{ form.accomplished_by|as_crispy_field }}
+                    {{ form.conformed_by|as_crispy_field }}
+                    {{ form.action_taken|as_crispy_field }}
+                    {{ form.remarks|as_crispy_field }}
+                    {{ form.datetime_completed|as_crispy_field }}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>{{ action }} Work Order Request
+                        </button>
+                        <a href="{% url 'work_order_request_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load inventory_extras %}
+
+{% block title %}Computers - TSG IMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1 class="display-4">Computer Laboratory</h1>
+    </div>
+    <div class="col-md-3">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search computers..." id="searchInput">
+            <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+    <div class="col-md-3 text-end">
+        {% if user.is_superuser or user.is_staff %}
+        <a href="{% url 'add_computer' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Add Computer
+        </a>
+        {% endif %}
+    </div>
+</div>
+<div class="row mb-3 align-items-center">
+    <div class="col-md-6 col-12">
+        <label for="roomFilter" class="form-label fw-bold mb-0 me-2">Show Room:</label>
+        <select id="roomFilter" class="form-select w-auto d-inline-block ms-2">
+            <option value="all">All</option>
+            {% for room in rooms %}
+                <option value="{{ room }}">{{ room }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-6 col-12 text-end mt-2 mt-md-0">
+        <a id="downloadCsvBtn" href="{% url 'export_computers_csv' %}" class="btn btn-primary">
+            <i class="fas fa-download"></i> Download CSV
+        </a>
+    </div>
+</div>
+{% for room in rooms %}
+<div class="row mb-4 room-table" data-room="{{ room }}">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-building me-2"></i>{{ room }} - Computer Laboratory
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Entity Name</th>
+                                <th>Custody</th>
+                                <th>Memorandum Receipt</th>
+                                <th>Unit No</th>
+                                <th>Motherboard</th>
+                                <th>Storage</th>
+                                <th>Processor</th>
+                                <th>Video Card 0</th>
+                                <th>Video Card 1</th>
+                                <th>RAM</th>
+                                <th>RAM Slot</th>
+                                <th>Mouse</th>
+                                <th>Keyboard</th>
+                                <th>Monitor Model</th>
+                                <th>Monitor Serial Number</th>
+                                <th>Status</th>
+                                <th>Last Maintenance</th>
+                                <th>Remarks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for computer in computers_by_room|get_item:room %}
+                            <tr>
+                                <td>{{ computer.entity_name|default:"-" }}</td>
+                                <td>{{ computer.custody|default:"-" }}</td>
+                                <td>{{ computer.mr|default:"-" }}</td>
+                                <td>{{ computer.unit_no|default:"-" }}</td>
+                                <td>{{ computer.motherboard|default:"-" }}</td>
+                                <td>{{ computer.storage|default:"-" }}</td>
+                                <td>{{ computer.processor|default:"-" }}</td>
+                                <td>{{ computer.video_card_0|default:"-" }}</td>
+                                <td>{{ computer.video_card_1|default:"-" }}</td>
+                                <td>{{ computer.ram|default:"-" }}</td>
+                                <td>{{ computer.ram_slot|default:"-" }}</td>
+                                <td>{{ computer.mouse|default:"-" }}</td>
+                                <td>{{ computer.keyboard|default:"-" }}</td>
+                                <td>{{ computer.monitor_model|default:"-" }}</td>
+                                <td>{{ computer.monitor_serial_number|default:"-" }}</td>
+                                <td>
+                                    <span class="badge {% if computer.status == 'operational' %}bg-success
+                                                  {% elif computer.status == 'maintenance' %}bg-warning
+                                                  {% else %}bg-danger{% endif %}">
+                                        {{ computer.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ computer.last_maintenance|default:"Never" }}</td>
+                                <td>{{ computer.remarks|default:"-" }}</td>
+                                <td>
+                                    <a href="{% url 'computer_detail' computer.pk %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if user.is_superuser or user.is_staff %}
+                                    <a href="{% url 'edit_computer' computer.pk %}" class="btn btn-sm btn-warning ms-1">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="18" class="text-center text-muted">
+                                    <i class="fas fa-info-circle me-2"></i>No computers found in {{ room }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('searchButton').addEventListener('click', function() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('searchButton').click();
+        }
+    });
+
+    // Room filter functionality
+    const roomFilter = document.getElementById('roomFilter');
+    const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+    roomFilter.addEventListener('change', function() {
+        const selectedRoom = this.value;
+        document.querySelectorAll('.room-table').forEach(function(tableDiv) {
+            if (selectedRoom === 'all' || tableDiv.getAttribute('data-room') === selectedRoom) {
+                tableDiv.style.display = '';
+            } else {
+                tableDiv.style.display = 'none';
+            }
+        });
+        // Update download button href
+        if (selectedRoom === 'all') {
+            downloadCsvBtn.href = "{% url 'export_computers_csv' %}";
+        } else {
+            downloadCsvBtn.href = "{% url 'export_computers_csv_room' room='ROOM_PLACEHOLDER' %}".replace('ROOM_PLACEHOLDER', selectedRoom);
+        }
+    });
+</script>
+{% endblock %} 

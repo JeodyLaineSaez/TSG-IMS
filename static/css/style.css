@@ -1,0 +1,63 @@
+/* Custom styles for TSG IMS */
+
+/* Dashboard cards */
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Status badges */
+.badge {
+    padding: 0.5em 1em;
+    font-weight: 500;
+}
+
+/* Table styles */
+.table th {
+    background-color: #f8f9fa;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Search input */
+.input-group {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Chart containers */
+canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* Navigation */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Quick action buttons */
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .table-responsive {
+        margin-bottom: 1rem;
+    }
+} 

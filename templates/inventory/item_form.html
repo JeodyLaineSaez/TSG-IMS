@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} Inventory Item - TSG IMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="text-center mb-4">{{ action }} Inventory Item</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.entity|as_crispy_field }}
+                    {{ form.fund_cluster|as_crispy_field }}
+                    {{ form.name|as_crispy_field }}
+                    {{ form.category|as_crispy_field }}
+                    {{ form.quantity|as_crispy_field }}
+                    {{ form.unit|as_crispy_field }}
+                    {{ form.unit_cost|as_crispy_field }}
+                    {{ form.description|as_crispy_field }}
+                    {{ form.brand|as_crispy_field }}
+                    {{ form.model|as_crispy_field }}
+                    {{ form.serial_no|as_crispy_field }}
+                    {{ form.expiry_date|as_crispy_field }}
+                    {{ form.inventory_item_no|as_crispy_field }}
+                    {{ form.estimated_useful_life|as_crispy_field }}
+                    {{ form.supplier|as_crispy_field }}
+                    {{ form.received_by|as_crispy_field }}
+                    {{ form.received_by_position|as_crispy_field }}
+                    {{ form.received_by_date|as_crispy_field }}
+                    {{ form.receive_from|as_crispy_field }}
+                    {{ form.receive_from_position|as_crispy_field }}
+                    {{ form.receive_from_date|as_crispy_field }}
+                    {{ form.purchase_order_no|as_crispy_field }}
+                    {{ form.status|as_crispy_field }}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>{{ action }} Item
+                        </button>
+                        <a href="{% url 'item_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

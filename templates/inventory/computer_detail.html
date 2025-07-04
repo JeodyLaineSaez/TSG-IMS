@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Computer Details - TSG IMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="display-4">Computer Details</h1>
+        <p class="text-muted">Room: {{ computer.room|default:"Not specified" }} | Unit: {{ computer.unit_no|default:"Not specified" }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'computer_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">System Information</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            <span class="badge {% if computer.status == 'operational' %}bg-success
+                                          {% elif computer.status == 'maintenance' %}bg-warning
+                                          {% else %}bg-danger{% endif %}">
+                                {{ computer.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Room</th>
+                        <td>{{ computer.room|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Unit No</th>
+                        <td>{{ computer.unit_no|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Motherboard</th>
+                        <td>{{ computer.motherboard|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Storage</th>
+                        <td>{{ computer.storage|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Processor</th>
+                        <td>{{ computer.processor|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Last Maintenance</th>
+                        <td>{{ computer.last_maintenance|default:"Never" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Hardware Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Video Card 0</th>
+                        <td>{{ computer.video_card_0|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Video Card 1</th>
+                        <td>{{ computer.video_card_1|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>RAM</th>
+                        <td>{{ computer.ram|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>RAM Slot</th>
+                        <td>{{ computer.ram_slot|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Mouse</th>
+                        <td>{{ computer.mouse|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Keyboard</th>
+                        <td>{{ computer.keyboard|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Monitor Model</th>
+                        <td>{{ computer.monitor_model|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Monitor Serial Number</th>
+                        <td>{{ computer.monitor_serial_number|default:"Not specified" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Remarks</th>
+                        <td>{{ computer.remarks|default:"No remarks" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

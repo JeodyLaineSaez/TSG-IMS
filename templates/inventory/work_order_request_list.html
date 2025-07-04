@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Work Order Requests - TSG IMS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar with Add Work Order Request Form -->
+    <div class="col-md-4 col-lg-3 mb-4">
+        <div class="card shadow">
+            <div class="card-body">
+                <h4 class="mb-3">Add Work Order Request</h4>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Add Work Order Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Work Order Requests Table -->
+    <div class="col-md-8 col-lg-9">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search work orders..." id="searchInput">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Item</th>
+                                        <th>Campus</th>
+                                        <th>Office</th>
+                                        <th>Date/Time Started</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th>Requested By</th>
+                                        <th>Actions Taken</th>
+                                        <th>Remarks</th>
+                                        <th>Date/Time Completed</th>
+                                        <th>Accomplished By</th>
+                                        <th>Conformed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for wo in work_orders %}
+                                    <tr>
+                                        <td>{{ wo.id }}</td>
+                                        <td>{{ wo.item }}</td>
+                                        <td>{{ wo.campus }}</td>
+                                        <td>{{ wo.office }}</td>
+                                        <td>{{ wo.datetime_started }}</td>
+                                        <td>{{ wo.get_type_display }}</td>
+                                        <td>{{ wo.description }}</td>
+                                        <td>{{ wo.requested_by }}</td>
+                                        <td>{{ wo.actions_taken }}</td>
+                                        <td>{{ wo.remarks }}</td>
+                                        <td>{{ wo.datetime_completed }}</td>
+                                        <td>{{ wo.accomplished_by }}</td>
+                                        <td>{{ wo.conformed }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="11" class="text-center">No work order requests found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('searchButton').addEventListener('click', function() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('searchButton').click();
+        }
+    });
+</script>
+{% endblock %} 

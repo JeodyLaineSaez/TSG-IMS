@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if edit %}Edit Computer{% else %}Add Computer{% endif %} - TSG IMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="text-center mb-4">{% if edit %}Edit Computer{% else %}Add New Computer{% endif %}</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.entity_name|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.custody|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.mr|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.status|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.room|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.unit_no|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.motherboard|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.storage|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.processor|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.video_card_0|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.video_card_1|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.ram|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.ram_slot|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.mouse|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.keyboard|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.monitor_model|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.monitor_serial_number|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.last_maintenance|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.remarks|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>{% if edit %}Update Computer{% else %}Save Computer{% endif %}
+                        </button>
+                        <a href="{% url 'computer_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+        border: 1px solid #ced4da;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>
+{% endblock %} 

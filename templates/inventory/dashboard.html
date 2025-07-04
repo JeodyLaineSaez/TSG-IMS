@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - TSG IMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Dashboard</h1>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-boxes me-2"></i>Total Items
+                    </h5>
+                    <h2 class="card-text">{{ total_items }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-laptop me-2"></i>Total Computers
+                    </h5>
+                    <h2 class="card-text">{{ total_computers }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Items by Category</h5>
+                    <canvas id="itemsByCategoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Computer Status Distribution</h5>
+                    <canvas id="computerStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts and Recent Activity -->
+    <div class="row">
+        <!-- Items Needing Attention -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Items Needing Attention
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items_needing_attention %}
+                                <tr>
+                                    <td>{{ item.name }}</td>
+                                    <td>{{ item.category.name }}</td>
+                                    <td>
+                                        <span class="badge {% if item.status == 'maintenance' %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ item.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No items need attention</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Computers Needing Maintenance -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools text-danger me-2"></i>
+                        Computers Needing Maintenance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Computer</th>
+                                    <th>Last Maintenance</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for computer in computers_needing_maintenance %}
+                                <tr>
+                                    <td>{{ computer.hostname }}</td>
+                                    <td>{{ computer.last_maintenance|default:"Never" }}</td>
+                                    <td>
+                                        <span class="badge bg-warning">Under Maintenance</span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No computers need maintenance</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Maintenance Records -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Maintenance Records
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Performed By</th>
+                                    <th>Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in recent_maintenance %}
+                                <tr>
+                                    <td>{{ record.item.name }}</td>
+                                    <td>{{ record.maintenance_date }}</td>
+                                    <td>{{ record.description }}</td>
+                                    <td>{{ record.performed_by }}</td>
+                                    <td>${{ record.cost|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No maintenance records</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/dashboard_charts.js' %}"></script>
+<script>
+    // Parse the chart data from Django context
+    const itemsByCategory = JSON.parse('{{ chart_data.items_by_category|escapejs }}');
+    const computerStatus = JSON.parse('{{ chart_data.computer_status|escapejs }}');
+
+    // Initialize charts when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCharts(itemsByCategory, computerStatus);
+    });
+</script>
+{% endblock %} 
