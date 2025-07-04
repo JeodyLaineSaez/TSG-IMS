@@ -90,12 +90,11 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <a href="{% url 'update_work_order_request' wo.pk %}" class="btn btn-sm btn-warning">Update</a>
-                                            <form action="{% url 'delete_work_order_request' wo.pk %}" method="post" style="display:inline;">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this work order request?');">Delete</button>
-                                            </form>
-                                            <a href="{% url 'export_work_order_docx' wo.pk %}" class="btn btn-sm btn-info">Export
+                                            <a href="{% url 'update_work_order_request' wo.pk %}" class="btn btn-sm btn-warning" title="Update">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'export_work_order_docx' wo.pk %}" class="btn btn-sm btn-info" title="Export Report">
+                                                <i class="fas fa-file-alt"></i>
                                             </a>
                                         </td>
                                     </tr>
