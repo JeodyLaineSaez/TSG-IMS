@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Select Transaction{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Select Transaction for {{ item.name }}</h1>
+    <div class="mt-4">
+        <a href="{% url 'work_order_request_list_and_add' %}?item_id={{ item.id }}" class="btn btn-success">Work Order Request</a>
+        <a href="{% url 'borrower_form' %}?item_id={{ item.pk }}" class="btn btn-success">Borrower Request</a>
+    </div>
+    <a href="{% url 'item_detail' item.pk %}" class="btn btn-secondary mt-3">Back to Item Detail</a>
+</div>
+{% endblock %}

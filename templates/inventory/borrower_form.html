@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Borrower Form{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Borrower Form</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="item" class="form-label">Item Name</label>
+            <select class="form-select" id="item" name="item" required>
+                {% for item in items %}
+                <option value="{{ item.id }}">{{ item.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="borrower_lname" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="borrower_lname" name="borrower_lname" required>
+        </div>
+        <div class="mb-3">
+            <label for="borrower_fname" class="form-label">First Name</label>
+            <input type="text" class="form-control" id="borrower_fname" name="borrower_fname" required>
+        </div>
+        <div class="mb-3">
+            <label for="borrower_mi" class="form-label">Middle Initial</label>
+            <input type="text" class="form-control" id="borrower_mi" name="borrower_mi">
+        </div>
+        <div class="mb-3">
+            <label for="campus" class="form-label">Campus</label>
+            <select class="form-select" id="campus" name="campus" required>
+                {% for entity in entities %}
+                <option value="{{ entity.id }}">{{ entity.entity_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="office" class="form-label">Office</label>
+            <select class="form-select" id="office" name="office" required>
+                {% for office in offices %}
+                <option value="{{ office.id }}">{{ office.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="datetime_borrowed" class="form-label">Date/Time Borrowed</label>
+            <input type="datetime-local" class="form-control" id="datetime_borrowed" name="datetime_borrowed" required>
+        </div>
+        <div class="mb-3">
+            <label for="purpose" class="form-label">Purpose</label>
+            <input type="text" class="form-control" id="purpose" name="purpose" required>
+        </div>
+        <div class="mb-3">
+            <label for="action_taken" class="form-label">Action Taken</label>
+            <select class="form-select" id="action_taken" name="action_taken" required>
+                <option value="borrowed">Borrowed</option>
+                <option value="returned">Returned</option>
+                <option value="renewed">Renewed</option>
+                <option value="damaged">Damaged</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="remarks" class="form-label">Remarks</label>
+            <input type="text" class="form-control" id="remarks" name="remarks">
+        </div>
+        <div class="mb-3">
+            <label for="datetime_returned" class="form-label">Date/Time Returned</label>
+            <input type="datetime-local" class="form-control" id="datetime_returned" name="datetime_returned">
+        </div>
+        <div class="mb-3">
+            <label for="approved_by" class="form-label">Approved By</label>
+            <select class="form-select" id="approved_by" name="approved_by" required>
+                {% for person in accomplished_by_list %}
+                <option value="{{ person.id }}">{{ person.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'borrower_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %} 

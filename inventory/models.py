@@ -164,4 +164,27 @@ class WorkOrderRequest(models.Model):
     conformed_by = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return f"Work Order for {self.item} ({self.type})" 
+        return f"Work Order for {self.item} ({self.type})"
+
+class Borrower(models.Model):
+    ACTION_CHOICES = [
+        ('borrowed', 'Borrowed'),
+        ('returned', 'Returned'),
+        ('renewed', 'Renewed'),
+        ('damaged', 'Damaged'),
+    ]
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    borrower_lname = models.CharField(max_length=100)
+    borrower_fname = models.CharField(max_length=100)
+    borrower_mi = models.CharField(max_length=10)
+    campus = models.ForeignKey(Entity, on_delete=models.SET_NULL, null=True, blank=True)
+    office = models.ForeignKey(Office, on_delete=models.SET_NULL, null=True, blank=True)
+    datetime_borrowed = models.DateTimeField()
+    purpose = models.CharField(max_length=255)
+    action_taken = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    remarks = models.CharField(max_length=255)
+    datetime_returned = models.DateTimeField(blank=True, null=True)
+    approved_by = models.ForeignKey(AccomplishedBy, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"Borrower for {self.item.name} ({self.action_taken})" 

@@ -2,7 +2,7 @@ from ast import PyCF_ALLOW_TOP_LEVEL_AWAIT
 from cProfile import label
 from types import ModuleType
 from django import forms
-from .models import Item, Computer, WorkOrderRequest, Office, AccomplishedBy
+from .models import Item, Computer, WorkOrderRequest, Office, AccomplishedBy, Borrower
 
 class ItemForm(forms.ModelForm):
     UNIT_CHOICES = [
@@ -150,4 +150,15 @@ class WorkOrderRequestForm(forms.ModelForm):
             'action_taken': forms.Textarea(attrs={'rows': 2}),
             'remarks': forms.Textarea(attrs={'rows': 2}),
         }
-        
+
+class BorrowerForm(forms.ModelForm):
+    class Meta:
+        model = Borrower
+        fields = [
+            'item', 'borrower_lname', 'borrower_fname', 'borrower_mi', 'campus', 'office', 'datetime_borrowed', 
+            'purpose', 'action_taken', 'remarks', 'datetime_returned', 'approved_by'
+        ]
+        widgets = {
+            'datetime_borrowed': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'datetime_returned': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        } 

@@ -3,12 +3,12 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
-from .models import Category, Item, Computer, Entity, Brand, ModelName, Supplier, Personnel, Position, WorkOrderRequest
+from .models import Category, Item, Computer, Entity, Brand, ModelName, Supplier, Personnel, Position, WorkOrderRequest, Borrower, Office, AccomplishedBy
 from django.db.models import Count, Sum, IntegerField
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.functions import Cast
 import json
-from .forms import ItemForm, ComputerForm, WorkOrderRequestForm
+from .forms import ItemForm, ComputerForm, WorkOrderRequestForm, BorrowerForm
 import csv
 from django.http import HttpResponse
 from typing import TYPE_CHECKING
@@ -302,3 +302,51 @@ def export_work_order_docx(request, pk):
         response = HttpResponse(tmp.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
         response['Content-Disposition'] = f'attachment; filename=work_order_{work_order.pk}.docx'
         return response 
+
+@login_required
+def borrower_list(request):
+    borrowers = Borrower.objects.select_related('item').all()
+    return render(request, 'inventory/borrower_list.html', {'borrowers': borrowers})
+
+@login_required
+def borrower_form(request):
+    edit_id = request.GET.get('edit_id')
+    item_id = request.GET.get('item_id')
+    borrower_instance = None
+    initial = {}
+    if item_id:
+        initial['item'] = item_id
+    if edit_id:
+        borrower_instance = get_object_or_404(Borrower, pk=edit_id)
+    if request.method == 'POST':
+        if edit_id and borrower_instance:
+            form = BorrowerForm(request.POST, instance=borrower_instance)
+        else:
+            form = BorrowerForm(request.POST, initial=initial)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Borrower record saved successfully!')
+            form = BorrowerForm()  # Reset form after save
+            edit_id = None
+            borrower_instance = None
+    else:
+        if borrower_instance:
+            form = BorrowerForm(instance=borrower_instance)
+        else:
+            form = BorrowerForm(initial=initial)
+    borrowers = Borrower.objects.select_related('item', 'campus', 'office', 'approved_by').all()
+    return render(request, 'inventory/borrower_list_form.html', {
+        'form': form,
+        'items': Item.objects.all(),
+        'entities': Entity.objects.all(),
+        'offices': Office.objects.all(),
+        'accomplished_by_list': AccomplishedBy.objects.all(),
+        'borrowers': borrowers,
+        'edit_id': edit_id,
+        'selected_item_id': item_id,
+    })
+
+@login_required
+def item_transaction_select(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    return render(request, 'inventory/item_transaction_select.html', {'item': item}) 

@@ -76,7 +76,7 @@
                                         <td>{{ item.id }}</td>
                                         <td>{{ item.entity.entity_name }}</td>
                                         <td>{{ item.fund_cluster }}</td>
-                                        <td><a href="{% url 'work_order_request_list_and_add' %}?item_id={{ item.id }}">{{ item.name }}</a></td>
+                                        <td>{{ item.name }}</td>
                                         <td>{{ item.category.name }}</td>
                                         <td>{{ item.quantity }}</td>
                                         <td>{{ item.unit }}</td>
@@ -106,6 +106,9 @@
                                             </span>
                                         </td>
                                         <td>
+                                            <a href="{% url 'item_transaction_select' item.pk %}" class="btn btn-sm btn-primary mb-1" title="Transaction">
+                                                <i class="fas fa-exchange-alt"></i>
+                                            </a>
                                             <a href="{% url 'item_detail' item.pk %}" class="btn btn-sm btn-info" title="View">
                                                 <i class="fas fa-eye"></i>
                                             </a>
