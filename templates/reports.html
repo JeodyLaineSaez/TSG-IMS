@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Reports - Computer Laboratory{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Computer Laboratory Reports</h1>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label for="roomSelect" class="form-label">Select Room:</label>
+            <select id="roomSelect" class="form-select">
+                <option value="all">All Rooms</option>
+                {% for room in rooms %}
+                    <option value="EB{{ room }}">EB {{ room }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="reportTypeSelect" class="form-label">Select Report Type:</label>
+            <select id="reportTypeSelect" class="form-select">
+                <option value="functionality">Functionality Report</option>
+                <option value="components">Components Inventory Report</option>
+            </select>
+        </div>
+    </div>
+    <div id="reportTableContainer">
+        <!-- Table will be dynamically inserted here -->
+    </div>
+</div>
+
+<script>
+    // Example data, replace with actual data from Django context in production
+    const computers = {{ computers|safe }};
+
+    function renderFunctionalityTable(filteredComputers, room) {
+        let html = `<table class="table table-bordered text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>Unit No.</th>
+                    <th>Lab Equipment/Tool</th>
+                    <th>Operating System</th>
+                    <th>Source</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>`;
+        if (filteredComputers.length === 0) {
+            html += `<tr><td colspan="5" class="text-muted">No data available.</td></tr>`;
+        } else {
+            filteredComputers.forEach(c => {
+                html += `<tr>
+                    <td>${c.unit_no || '-'}</td>
+                    <td>${c.lab_equipment || '-'}</td>
+                    <td>${c.operating_system || '-'}</td>
+                    <td>${c.source || '-'}</td>
+                    <td>${c.status || '-'}</td>
+                </tr>`;
+            });
+        }
+        html += `</tbody></table>`;
+        html += `<div class="d-flex gap-2 mb-5">`;
+        if (room === 'all') {
+            html += `<a id="exportBtn" class="btn btn-success" href="/reports/functionality/all/">Export DOCX</a>`;
+        } else {
+            html += `<a id="exportBtn" class="btn btn-success${room === 'all' ? ' disabled' : ''}" href="${room !== 'all' ? `/reports/functionality/${room.replace('EB','')}/` : '#'}"${room === 'all' ? ' tabindex="-1" aria-disabled="true" title="Select a specific room to export"' : ''}>Export DOCX</a>`;
+        }
+        html += `<button id="printBtn" class="btn btn-secondary">Print</button>\n        </div>`;
+        return html;
+    }
+
+    function renderComponentsTable(filteredComputers, room) {
+        let html = `<table class="table table-bordered text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>Unit No.</th>
+                    <th>Motherboard System Model</th>
+                    <th>Storage</th>
+                    <th>Processor</th>
+                    <th>Video card 0</th>
+                    <th>Video card 1</th>
+                    <th>Ram</th>
+                    <th>Ram slot</th>
+                    <th>Mouse</th>
+                    <th>Keyboard</th>
+                    <th>Monitor Model</th>
+                    <th>Monitor Serial number</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+        if (filteredComputers.length === 0) {
+            html += `<tr><td colspan="14" class="text-muted">No data available.</td></tr>`;
+        } else {
+            filteredComputers.forEach(c => {
+                html += `<tr>
+                    <td>${c.unit_no || '-'}</td>
+                    <td>${c.motherboard || '-'}</td>
+                    <td>${c.storage || '-'}</td>
+                    <td>${c.processor || '-'}</td>
+                    <td>${c.video_card_0 || '-'}</td>
+                    <td>${c.video_card_1 || '-'}</td>
+                    <td>${c.ram || '-'}</td>
+                    <td>${c.ram_slot || '-'}</td>
+                    <td>${c.mouse || '-'}</td>
+                    <td>${c.keyboard || '-'}</td>
+                    <td>${c.monitor_model || '-'}</td>
+                    <td>${c.monitor_serial_number || '-'}</td>
+                    <td>${c.status || '-'}</td>
+                    <td>${c.remarks || '-'}</td>
+                </tr>`;
+            });
+        }
+        html += `</tbody></table>`;
+        html += `<div class="d-flex gap-2 mb-5">
+            <a id="exportBtn" class="btn btn-success${room === 'all' ? ' disabled' : ''}" href="${room !== 'all' ? `/reports/components_inventory/${room.replace('EB','')}/` : '#'}"${room === 'all' ? ' tabindex="-1" aria-disabled="true" title="Select a specific room to export"' : ''}>Export DOCX</a>
+            <button id="printBtn" class="btn btn-secondary">Print</button>
+        </div>`;
+        return html;
+    }
+
+    function updateTable() {
+        const room = document.getElementById('roomSelect').value;
+        const reportType = document.getElementById('reportTypeSelect').value;
+        let filtered = computers;
+        if (room !== 'all') {
+            filtered = computers.filter(c => c.room === room);
+        }
+        let html = '';
+        if (reportType === 'functionality') {
+            html = renderFunctionalityTable(filtered, room);
+        } else {
+            html = renderComponentsTable(filtered, room);
+        }
+        document.getElementById('reportTableContainer').innerHTML = html;
+        // Print button
+        const printBtn = document.getElementById('printBtn');
+        if (printBtn) {
+            printBtn.onclick = function() {
+                window.print();
+            };
+        }
+    }
+
+    document.getElementById('roomSelect').addEventListener('change', updateTable);
+    document.getElementById('reportTypeSelect').addEventListener('change', updateTable);
+    window.onload = updateTable;
+</script>
+{% endblock %} 

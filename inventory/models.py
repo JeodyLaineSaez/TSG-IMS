@@ -104,6 +104,9 @@ class Computer(models.Model):
     mr = models.CharField(max_length=100, null=True, blank=True)
     room = models.CharField(max_length=50, null=True, blank=True)
     unit_no = models.CharField(max_length=50, null=True, blank=True)
+    lab_equipment = models.CharField(max_length=50, null=True, blank=True)
+    operating_system = models.CharField(max_length=50, null=True, blank=True)
+    source = models.CharField(max_length=50, null=True, blank=True)
     motherboard = models.CharField(max_length=50, null=True, blank=True)
     storage = models.CharField(max_length=50, null=True, blank=True)
     processor = models.CharField(max_length=50, null=True, blank=True)
@@ -188,3 +191,4 @@ class Borrower(models.Model):
 
     def __str__(self):
         return f"Borrower for {self.item.name} ({self.action_taken})" 
+

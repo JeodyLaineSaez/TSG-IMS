@@ -36,17 +36,27 @@
                             {{ form.unit_no|as_crispy_field }}
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6">
-                            {{ form.motherboard|as_crispy_field }}
+                            {{ form.lab_equipment|as_crispy_field }}
                         </div>
                         <div class="col-md-6">
-                            {{ form.storage|as_crispy_field }}
+                            {{ form.operating_system|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.source|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.motherboard|as_crispy_field }}
                         </div>
                     </div>
 
                     <div class="row">
+                        <div class="col-md-6">
+                            {{ form.storage|as_crispy_field }}
+                        </div>
                         <div class="col-md-6">
                             {{ form.processor|as_crispy_field }}
                         </div>

@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 from docx import Document
 import tempfile
 from docxtpl import DocxTemplate
+from django.utils import timezone
 if TYPE_CHECKING:
     from .models import Computer
 
@@ -349,4 +350,113 @@ def borrower_form(request):
 @login_required
 def item_transaction_select(request, pk):
     item = get_object_or_404(Item, pk=pk)
-    return render(request, 'inventory/item_transaction_select.html', {'item': item}) 
+    return render(request, 'inventory/item_transaction_select.html', {'item': item})
+
+ROOMS = ['204', '205', '206', '207', '208', '209', '210']
+
+def reports_view(request):
+    computers = list(Computer.objects.values(
+        'unit_no', 'lab_equipment', 'operating_system', 'source', 'status', 'room',
+        'motherboard', 'storage', 'processor', 'video_card_0', 'video_card_1', 'ram', 'ram_slot',
+        'mouse', 'keyboard', 'monitor_model', 'monitor_serial_number', 'remarks'
+    ))
+    return render(request, 'reports.html', {'rooms': ROOMS, 'computers': json.dumps(computers)})
+
+# Helper function for functionality report context
+
+def get_functionality_report_context(room):
+    return {
+        'room': room,
+        'today': timezone.now().strftime('%B %d, %Y'),
+        'computers': [
+            {
+                'unit_no': c.unit_no,
+                'lab_equipment': c.lab_equipment,
+                'operating_system': c.operating_system,
+                'source': c.source,
+                'status': c.status,
+            }
+            for c in Computer.objects.filter(room=f'EB{room}')
+        ]
+    }
+
+def export_functionality_report_docx(request, room):
+    template_path = 'static/Functionality Report.docx'  # Updated to match user path
+    doc = DocxTemplate(template_path)
+    context = get_functionality_report_context(room)
+    doc.render(context)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp:
+        doc.save(tmp.name)
+        tmp.seek(0)
+        response = HttpResponse(tmp.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = f'attachment; filename=functionality_report_EB{room}.docx'
+        return response
+
+def get_components_inventory_report_context(room):
+    return {
+        'room': room,
+        'today': timezone.now().strftime('%B %d, %Y'),
+        'computers': [
+            {
+                'unit_no': c.unit_no,
+                'motherboard': c.motherboard,
+                'storage': c.storage,
+                'processor': c.processor,
+                'video_card_0': c.video_card_0,
+                'video_card_1': c.video_card_1,
+                'ram': c.ram,
+                'ram_slot': c.ram_slot,
+                'mouse': c.mouse,
+                'keyboard': c.keyboard,
+                'monitor_model': c.monitor_model,
+                'monitor_serial_number': c.monitor_serial_number,
+                'status': c.status,
+                'remarks': c.remarks
+            }
+            for c in Computer.objects.filter(room=f'EB{room}')
+        ]
+    }
+
+def export_components_inventory_docx(request, room):
+    template_path = 'static/Components Inventory Report.docx'
+    doc = DocxTemplate(template_path)
+    context = get_components_inventory_report_context(room)
+    doc.render(context)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp:
+        doc.save(tmp.name)
+        tmp.seek(0)
+        response = HttpResponse(tmp.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = f'attachment; filename=components_report_EB{room}.docx'
+        return response
+
+def get_functionality_report_context_all():
+    rooms = ROOMS
+    all_computers = []
+    for room in rooms:
+        computers = [
+            {
+                'unit_no': c.unit_no,
+                'lab_equipment': c.lab_equipment,
+                'operating_system': c.operating_system,
+                'source': c.source,
+                'status': c.status,
+            }
+            for c in Computer.objects.filter(room=f'EB{room}')
+        ]
+        all_computers.append({'room': room, 'computers': computers})
+    return {
+        'rooms': all_computers,
+        'today': timezone.now().strftime('%B %d, %Y'),
+    }
+
+def export_functionality_report_docx_all(request):
+    template_path = 'static/Functionality Report.docx'
+    doc = DocxTemplate(template_path)
+    context = get_functionality_report_context_all()
+    doc.render(context)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp:
+        doc.save(tmp.name)
+        tmp.seek(0)
+        response = HttpResponse(tmp.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = 'attachment; filename=functionality_report_all_rooms.docx'
+        return response

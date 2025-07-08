@@ -25,4 +25,8 @@ urlpatterns = [
     path('borrowers/', views.borrower_list, name='borrower_list'),
     path('borrowers/add/', views.borrower_form, name='borrower_form'),
     path('items/<int:pk>/transaction/', views.item_transaction_select, name='item_transaction_select'),
+    path('reports/', views.reports_view, name='reports_view'),
+    path('reports/functionality/<str:room>/', views.export_functionality_report_docx, name='export_functionality_report_docx'),
+    path('reports/components_inventory/<str:room>/', views.export_components_inventory_docx, name='export_components_inventory_docx'),
+    path('reports/functionality/all/', views.export_functionality_report_docx_all, name='export_functionality_report_docx_all'),
 ]

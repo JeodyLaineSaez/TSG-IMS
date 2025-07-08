@@ -55,6 +55,23 @@ class ComputerForm(forms.ModelForm):
     PC_UNIT_CHOICES = [(str(i), str(i)) for i in range(0, 21)]
     unit_no = forms.ChoiceField(choices=PC_UNIT_CHOICES, required=True)
 
+    LAB_EQUIP_CHOICES = [
+        ("Desktop Computer (Teacher's Table)", "Desktop Computer (Teacher's Table)"),
+        ("Desktop Computer", "Desktop Computer")
+    ]
+    lab_equipment = forms.ChoiceField(choices=LAB_EQUIP_CHOICES, required=True)
+    
+    OPERATING_SYSTEM_CHOICES = [
+        ("Windows 11", "Windows 11"),
+        ("Windows 10", "Windows 10")
+    ]
+    operating_system = forms.ChoiceField(choices=OPERATING_SYSTEM_CHOICES, required=True)
+    
+    SOURCE_CHOICES = [
+        ("License", "License")
+    ]
+    source = forms.ChoiceField(choices=SOURCE_CHOICES, required=True)
+    
     MOTHERBOARD_CHOICES = [
         ("B660M DS3H DDR4", "B660M DS3H DDR4"),
         ("HP 280 G3 MT", "HP 280 G3 MT")
@@ -129,7 +146,7 @@ class ComputerForm(forms.ModelForm):
     class Meta:
         model = Computer
         fields = [
-            'entity_name', 'custody', 'mr', 'room', 'unit_no', 'motherboard', 'storage', 'processor', 'video_card_0', 'video_card_1', 'ram', 'ram_slot',
+            'entity_name', 'custody', 'mr', 'room', 'unit_no', 'lab_equipment', 'operating_system', 'source', 'motherboard', 'storage', 'processor', 'video_card_0', 'video_card_1', 'ram', 'ram_slot',
             'mouse', 'keyboard', 'monitor_model', 'monitor_serial_number', 'remarks', 'status', 'last_maintenance'
         ]
         widgets = {
