@@ -16,6 +16,8 @@ from docx import Document
 import tempfile
 from docxtpl import DocxTemplate
 from django.utils import timezone
+import tempfile
+from docxcompose.composer import Composer
 if TYPE_CHECKING:
     from .models import Computer
 
@@ -72,7 +74,8 @@ def dashboard(request):
 
 @login_required
 def item_list(request):
-    items = Item.objects.all().select_related('entity', 'category', 'brand', 'model', 'supplier', 'received_by', 'received_by_position', 'receive_from', 'receive_from_position', 'fund_cluster')  # type: ignore
+    # Only show items with status available, in_use, or maintenance
+    items = Item.objects.filter(status__in=['available', 'in_use', 'maintenance']).select_related('entity', 'category', 'brand', 'model', 'supplier', 'received_by', 'received_by_position', 'receive_from', 'receive_from_position', 'fund_cluster')
     edit_id = request.GET.get('edit')
     form = None
     if request.method == 'POST':
@@ -91,7 +94,13 @@ def item_list(request):
             form = ItemForm(instance=item)
         else:
             form = ItemForm()
-    return render(request, 'inventory/item_list.html', {'items': items, 'form': form, 'action': 'Edit' if edit_id else 'Add', 'edit_id': edit_id})
+    return render(request, 'inventory/item_list.html', {'items': items, 'form': form, 'action': 'Edit' if edit_id else 'Add', 'edit_id': edit_id, 'archive': False})
+
+@login_required
+def item_archive(request):
+    # Only show items with status disposed
+    items = Item.objects.filter(status='disposed').select_related('entity', 'category', 'brand', 'model', 'supplier', 'received_by', 'received_by_position', 'receive_from', 'receive_from_position', 'fund_cluster')
+    return render(request, 'inventory/item_list.html', {'items': items, 'archive': True})
 
 @login_required
 def item_detail(request, pk):
@@ -360,10 +369,36 @@ def reports_view(request):
         'motherboard', 'storage', 'processor', 'video_card_0', 'video_card_1', 'ram', 'ram_slot',
         'mouse', 'keyboard', 'monitor_model', 'monitor_serial_number', 'remarks'
     ))
-    return render(request, 'reports.html', {'rooms': ROOMS, 'computers': json.dumps(computers)})
+    # Prepare inventory items for reporting
+    items = Item.objects.select_related('entity', 'fund_cluster', 'category', 'supplier').all()
+    inventory_items = [
+        {
+            'no': item.id,
+            'entity': item.entity.entity_name if item.entity else '-',
+            'fund_cluster': item.fund_cluster.name if item.fund_cluster else '-',
+            'name': item.name,
+            'category': item.category.name if item.category else '-',
+            'quantity': item.quantity,
+            'unit': item.unit,
+            'unit_cost': str(item.unit_cost) if item.unit_cost is not None else '-',
+            'description': item.description or '-',
+            'expiry_date': item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else '-',
+            'inventory_item_no': item.inventory_item_no,
+            'estimated_useful_life': item.estimated_useful_life if item.estimated_useful_life is not None else '-',
+            'supplier': item.supplier.name if item.supplier else '-',
+            'custody': item.custody if item.custody else '-',
+            'status': item.status,
+            'status_display': item.get_status_display(),
+        }
+        for item in items
+    ]
+    return render(request, 'reports.html', {
+        'rooms': ROOMS,
+        'computers': json.dumps(computers),
+        'inventory_items': json.dumps(inventory_items),
+    })
 
 # Helper function for functionality report context
-
 def get_functionality_report_context(room):
     return {
         'room': room,
@@ -459,4 +494,97 @@ def export_functionality_report_docx_all(request):
         tmp.seek(0)
         response = HttpResponse(tmp.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
         response['Content-Disposition'] = 'attachment; filename=functionality_report_all_rooms.docx'
+        return response
+
+def export_inventory_item_docx(request):
+    status = request.GET.get('status', 'all')
+    if status == 'all':
+        items = Item.objects.select_related('category').all()
+    else:
+        items = Item.objects.select_related('category').filter(status=status)
+    context = {
+        'status': status,
+        'today': timezone.now().strftime('%B %d, %Y'),
+        'items': [
+            {
+                'id': item.id,
+                'name': item.name,
+                'category': item.category.name if item.category else '',
+                'quantity': item.quantity,
+                'unit': item.unit,
+                'unit_cost': str(item.unit_cost) if item.unit_cost is not None else '',
+                'status': item.status,
+                'status_display': item.get_status_display(),
+            }
+            for item in items
+        ]
+    }
+    template_path = 'static/Inventory Item Report.docx'  # Use your inventory item report template
+    doc = DocxTemplate(template_path)
+    doc.render(context)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp:
+        doc.save(tmp.name)
+        tmp.seek(0)
+        response = HttpResponse(tmp.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = f'attachment; filename=inventory_item_report_{status}.docx'
+        return response
+
+def export_borrowers_docx(request):
+    borrowers = Borrower.objects.select_related('item', 'campus', 'office', 'approved_by').all()
+    context = {
+        'today': timezone.now().strftime('%B %d, %Y'),
+        'borrowers': [
+            {
+                'id': b.pk,
+                'item_name': b.item.name if b.item else '',
+                'borrower_name': b.borrower_lname + ',' + b.borrower_fname + b.borrower_mi,
+                'campus': b.campus.entity_name if b.campus else '-',
+                'office': b.office.name if b.office else '-',
+                'datetime_borrowed': b.datetime_borrowed.strftime('%Y-%m-%d %H:%M'),
+                'purpose': b.purpose,
+                'action_taken': b.get_action_taken_display(),
+                'remarks': b.remarks,
+                'datetime_returned': b.datetime_returned.strftime('%Y-%m-%d %H:%M') if b.datetime_returned else '-',
+                'approved_by': b.approved_by.name if b.approved_by else '-',
+            }
+            for b in borrowers
+        ]
+    }
+    template_path = 'static/BORROWER REQUEST.docx'  # Use your borrower report template
+    doc = DocxTemplate(template_path)
+    doc.render(context)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp:
+        doc.save(tmp.name)
+        tmp.seek(0)
+        response = HttpResponse(tmp.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = 'attachment; filename=borrowers_report.docx'
+        return response
+
+def export_borrower_docx(request, pk):
+    borrower = get_object_or_404(Borrower.objects.select_related('item', 'campus', 'office', 'approved_by'), pk=pk)
+    borrower_name = f"{borrower.borrower_lname}, {borrower.borrower_fname} {borrower.borrower_mi}".strip()
+    context = {
+        'today': timezone.now().strftime('%B %d, %Y'),
+        'borrower': {
+            'id': borrower.pk,
+            'item_name': borrower.item.name if borrower.item else '',
+            'borrower_name': borrower_name,
+            'campus': borrower.campus.entity_name if borrower.campus else '-',
+            'office': borrower.office.name if borrower.office else '-',
+            'datetime_borrowed': borrower.datetime_borrowed.strftime('%Y-%m-%d %H:%M'),
+            'purpose': borrower.purpose,
+            'action_taken': borrower.get_action_taken_display(),
+            'remarks': borrower.remarks,
+            'datetime_returned': borrower.datetime_returned.strftime('%Y-%m-%d %H:%M') if borrower.datetime_returned else '-',
+            'approved_by': borrower.approved_by.name if borrower.approved_by else '-',
+        }
+    }
+    template_path = 'static/BORROWER REQUEST.docx'  # Use your borrower request template
+    doc = DocxTemplate(template_path)
+    doc.render(context)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp:
+        doc.save(tmp.name)
+        tmp.seek(0)
+        response = HttpResponse(tmp.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = f'attachment; filename=borrower_request_{pk}.docx'
         return response

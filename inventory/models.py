@@ -77,7 +77,6 @@ class Item(models.Model):
     quantity = models.PositiveIntegerField(null=True, blank=True)
     unit = models.CharField(max_length=50, null=True, blank=True)
     unit_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     model = models.ForeignKey(ModelName, on_delete=models.SET_NULL, null=True, blank=True)
@@ -94,6 +93,7 @@ class Item(models.Model):
     receive_from_date = models.DateField(null=True, blank=True)
     purchase_order_no = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+    custody = models.CharField(max_length=255)
 
     def __str__(self):
         return f"{self.name} ({self.inventory_item_no})"
@@ -121,9 +121,9 @@ class Computer(models.Model):
     remarks = models.CharField(max_length=50, null=True, blank=True)
 
     STATUS_CHOICES = [
-        ('operational', 'Operational'),
-        ('maintenance', 'Under Maintenance'),
-        ('offline', 'Offline'),
+        ('Operational', 'Operational'),
+        ('Under Maintenance', 'Under Maintenance'),
+        ('Offline', 'Offline'),
     ]
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='operational')

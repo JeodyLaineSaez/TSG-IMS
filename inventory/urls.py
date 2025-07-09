@@ -24,9 +24,13 @@ urlpatterns = [
     path('work-orders/<int:pk>/export_docx/', views.export_work_order_docx, name='export_work_order_docx'),
     path('borrowers/', views.borrower_list, name='borrower_list'),
     path('borrowers/add/', views.borrower_form, name='borrower_form'),
+    path('borrowers/export/', views.export_borrowers_docx, name='export_borrowers_docx'),
+    path('borrowers/export/<int:pk>/', views.export_borrower_docx, name='export_borrower_docx'),
     path('items/<int:pk>/transaction/', views.item_transaction_select, name='item_transaction_select'),
     path('reports/', views.reports_view, name='reports_view'),
     path('reports/functionality/<str:room>/', views.export_functionality_report_docx, name='export_functionality_report_docx'),
     path('reports/components_inventory/<str:room>/', views.export_components_inventory_docx, name='export_components_inventory_docx'),
     path('reports/functionality/all/', views.export_functionality_report_docx_all, name='export_functionality_report_docx_all'),
+    path('reports/inventory_item_export/', views.export_inventory_item_docx, name='export_inventory_item_docx'),
+    path('items/archive/', views.item_archive, name='item_archive'),
 ]

@@ -3,6 +3,7 @@
 {% block content %}
 <div class="container">
     <h1>Borrower List</h1>
+    <a href="{% url 'export_borrowers_docx' %}" class="btn btn-success mb-3">Export to DOCX</a>
     <table class="table table-striped">
         <thead>
             <tr>

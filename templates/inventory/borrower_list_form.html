@@ -83,6 +83,7 @@
                                         <td>{{ borrower.approved_by.name|default:'-' }}</td>
                                         <td>
                                             <a href="?edit_id={{ borrower.pk }}" class="btn btn-sm btn-warning" title="Edit"><i class="fas fa-edit"></i></a>
+                                            <a href="{% url 'export_borrower_docx' borrower.pk %}" class="btn btn-sm btn-success" title="Export to DOCX"><i class="fas fa-file-word"></i></a>
                                         </td>
                                     </tr>
                                     {% empty %}

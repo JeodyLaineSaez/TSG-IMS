@@ -26,7 +26,7 @@ class ItemForm(forms.ModelForm):
             'brand', 'model', 'serial_no', 'expiry_date', 'inventory_item_no', 'estimated_useful_life',
             'supplier', 'received_by', 'received_by_position', 'received_by_date',
             'receive_from', 'receive_from_position', 'receive_from_date',
-            'purchase_order_no', 'status'
+            'purchase_order_no', 'status', 'custody'
         ]
         widgets = {
             'received_by_date': forms.DateInput(attrs={'type': 'date'}),

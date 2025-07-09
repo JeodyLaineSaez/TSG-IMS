@@ -10,7 +10,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class ItemAdmin(admin.ModelAdmin):
     list_display = (
         'name', 'category', 'inventory_item_no', 'supplier', 'received_by', 'status',
-        'entity', 'fund_cluster', 'quantity', 'unit', 'unit_cost', 'cost', 'brand', 'model', 'serial_no',
+        'entity', 'fund_cluster', 'quantity', 'unit', 'unit_cost', 'brand', 'model', 'serial_no',
         'expiry_date', 'estimated_useful_life', 'received_by_position', 'received_by_date',
         'receive_from', 'receive_from_position', 'receive_from_date', 'purchase_order_no'
     )

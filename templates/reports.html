@@ -3,7 +3,29 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="mb-4">Computer Laboratory Reports</h1>
+    <h1 class="mb-4">Inventory Items</h1>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label for="itemStatusSelect" class="form-label">Select Status:</label>
+            <select id="itemStatusSelect" class="form-select">
+                <option value="all">All</option>
+                <option value="available">Available</option>
+                <option value="in_use">In Use</option>
+                <option value="maintenance">Under Maintenance</option>
+                <option value="disposed">Disposed</option>
+            </select>
+        </div>
+    </div>
+    <div id="itemReportTableContainer"></div>
+    <div class="row mb-4">
+        <div class="col-md-4 d-flex align-items-end">
+            <a id="exportInventoryDocxBtn" class="btn btn-success ms-2" href="/reports/inventory_item_export/?status=all">Export DOCX</a>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <h1 class="mb-4">Computer Laboratory</h1>
     <div class="row mb-4">
         <div class="col-md-4">
             <label for="roomSelect" class="form-label">Select Room:</label>
@@ -28,8 +50,69 @@
 </div>
 
 <script>
-    // Example data, replace with actual data from Django context in production
-    const computers = {{ computers|safe }};
+    // Data from Django context
+    var computers = {{ computers|safe }};
+    var inventoryItems = {{ inventory_items|safe }};
+
+    function renderItemTable(filteredItems, status) {
+        let html = `<table class="table table-bordered text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>NO.</th>
+                    <th>Entity</th>
+                    <th>Fund Cluster</th>
+                    <th>Equipment/Device Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Unit</th>
+                    <th>Unit Cost</th>
+                    <th>Description</th>
+                    <th>Expiry Date</th>
+                    <th>Inventory Item No.</th>
+                    <th>Estimated Useful Life (year/s)</th>
+                    <th>Supplier</th>
+                    <th>Custody</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>`;
+        if (filteredItems.length === 0) {
+            html += `<tr><td colspan="15" class="text-muted">No data available.</td></tr>`;
+        } else {
+            filteredItems.forEach((item) => {
+                html += `<tr>
+                    <td>${item.no}</td>
+                    <td>${item.entity || '-'}</td>
+                    <td>${item.fund_cluster || '-'}</td>
+                    <td>${item.name}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.quantity || '-'}</td>
+                    <td>${item.unit || '-'}</td>
+                    <td>${item.unit_cost || '-'}</td>
+                    <td>${item.description || '-'}</td>
+                    <td>${item.expiry_date || '-'}</td>
+                    <td>${item.inventory_item_no || '-'}</td>
+                    <td>${item.estimated_useful_life || '-'}</td>
+                    <td>${item.supplier || '-'}</td>
+                    <td>${item.custody || '-'}</td>
+                    <td>${item.status_display || '-'}</td>
+                </tr>`;
+            });
+        }
+        html += `</tbody></table>`;
+        return html;
+    }
+
+    function updateItemTable() {
+        const status = document.getElementById('itemStatusSelect').value;
+        let filtered = inventoryItems;
+        if (status !== 'all') {
+            filtered = inventoryItems.filter(item => item.status === status);
+        }
+        document.getElementById('itemReportTableContainer').innerHTML = renderItemTable(filtered, status);
+        // Update export link
+        document.getElementById('exportInventoryDocxBtn').href = `/reports/inventory_item_export/?status=${status}`;
+    }
 
     function renderFunctionalityTable(filteredComputers, room) {
         let html = `<table class="table table-bordered text-center">
@@ -61,9 +144,9 @@
         if (room === 'all') {
             html += `<a id="exportBtn" class="btn btn-success" href="/reports/functionality/all/">Export DOCX</a>`;
         } else {
-            html += `<a id="exportBtn" class="btn btn-success${room === 'all' ? ' disabled' : ''}" href="${room !== 'all' ? `/reports/functionality/${room.replace('EB','')}/` : '#'}"${room === 'all' ? ' tabindex="-1" aria-disabled="true" title="Select a specific room to export"' : ''}>Export DOCX</a>`;
+            html += `<a id="exportBtn" class="btn btn-success${room === 'all' ? ' disabled' : ''}" href="${room !== 'all' ? `/reports/functionality/${room.replace('EB','')}/` : '#'}"${room === 'all' ? ' tabindex=\"-1\" aria-disabled=\"true\" title=\"Select a specific room to export\"' : ''}>Export DOCX</a>`;
         }
-        html += `<button id="printBtn" class="btn btn-secondary">Print</button>\n        </div>`;
+        html += `</div>`;
         return html;
     }
 
@@ -112,8 +195,7 @@
         }
         html += `</tbody></table>`;
         html += `<div class="d-flex gap-2 mb-5">
-            <a id="exportBtn" class="btn btn-success${room === 'all' ? ' disabled' : ''}" href="${room !== 'all' ? `/reports/components_inventory/${room.replace('EB','')}/` : '#'}"${room === 'all' ? ' tabindex="-1" aria-disabled="true" title="Select a specific room to export"' : ''}>Export DOCX</a>
-            <button id="printBtn" class="btn btn-secondary">Print</button>
+            <a id="exportBtn" class="btn btn-success${room === 'all' ? ' disabled' : ''}" href="${room !== 'all' ? `/reports/components_inventory/${room.replace('EB','')}/` : '#'}"${room === 'all' ? ' tabindex=\"-1\" aria-disabled=\"true\" title=\"Select a specific room to export\"' : ''}>Export DOCX</a>
         </div>`;
         return html;
     }
@@ -132,17 +214,20 @@
             html = renderComponentsTable(filtered, room);
         }
         document.getElementById('reportTableContainer').innerHTML = html;
-        // Print button
-        const printBtn = document.getElementById('printBtn');
-        if (printBtn) {
-            printBtn.onclick = function() {
-                window.print();
-            };
-        }
     }
 
-    document.getElementById('roomSelect').addEventListener('change', updateTable);
-    document.getElementById('reportTypeSelect').addEventListener('change', updateTable);
-    window.onload = updateTable;
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('roomSelect')) {
+            document.getElementById('roomSelect').addEventListener('change', updateTable);
+        }
+        if (document.getElementById('reportTypeSelect')) {
+            document.getElementById('reportTypeSelect').addEventListener('change', updateTable);
+        }
+        if (document.getElementById('itemStatusSelect')) {
+            document.getElementById('itemStatusSelect').addEventListener('change', updateItemTable);
+        }
+        updateItemTable();
+        updateTable();
+    });
 </script>
 {% endblock %} 
